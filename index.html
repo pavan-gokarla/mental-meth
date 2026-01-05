@@ -1,14 +1,512 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Math Master</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --danger: #ef4444;
+            --success: #10b981;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        h1, h2 {
+            margin-top: 0;
+            color: var(--text);
+            text-align: center;
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 1.5rem; }
+        h2 { font-size: 1.25rem; margin-bottom: 1rem; }
+
+        /* Screens */
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header label {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .drill-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .drill-item label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 1rem;
+        }
+
+        .btn:hover { background-color: var(--primary-hover); }
+
+        /* Quiz Layout */
+        .quiz-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .question-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 2rem 0;
+            color: var(--primary);
+        }
+
+        .answer-input {
+            width: 100%;
+            font-size: 1.5rem;
+            text-align: center;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .answer-input:focus { border-color: var(--primary); }
+        
+        /* Error Animation */
+        .input-error {
+            border-color: var(--danger) !important;
+            background-color: #fef2f2;
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* Results */
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 2rem;
+        }
+        
+        .score-val { font-size: 2rem; font-weight: bold; }
+        .score-label { font-size: 0.8rem; opacity: 0.9; }
+
+        .review-list {
+            list-style: none;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .review-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .review-item:last-child { border-bottom: none; }
+        .review-item.needs-practice { border-left: 4px solid var(--danger); background-color: #fff1f1; }
+        
+        .ans-detail span { font-weight: bold; }
+        .correct-ans { color: var(--success); }
+
+    </style>
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+
+    <div class="container">
+        <div id="settings-screen" class="screen active">
+            <h1>Mental Math Setup</h1>
+            
+            <div class="form-group">
+                <div class="form-header">
+                    <label><input type="checkbox" id="opt-tables"> Tables (1 to X)</label>
+                </div>
+                <input type="number" id="val-tables" value="20" placeholder="Max Range (e.g. 20)">
+            </div>
+
+            <div class="form-group">
+                <div class="form-header">
+                    <label><input type="checkbox" id="opt-squares"> Squares</label>
+                </div>
+                <input type="number" id="val-squares" value="30" placeholder="Max Number to Square">
+            </div>
+
+            <div class="form-group">
+                <div class="form-header">
+                    <label><input type="checkbox" id="opt-cubes"> Cubes</label>
+                </div>
+                <input type="number" id="val-cubes" value="15" placeholder="Max Number to Cube">
+            </div>
+
+            <div class="form-group">
+                <h2>Multiplication Drills (# of Qs)</h2>
+                <div class="drill-group">
+                    <div class="drill-item">
+                        <label>1 digit x 1 digit</label>
+                        <input type="number" id="qty-1x1" value="0" min="0">
+                    </div>
+                    <div class="drill-item">
+                        <label>2 digit x 2 digit</label>
+                        <input type="number" id="qty-2x2" value="0" min="0">
+                    </div>
+                    <div class="drill-item" style="grid-column: span 2;">
+                        <label>Random 2 digit x 2 digit (Mixed)</label>
+                        <input type="number" id="qty-mixed" value="0" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="startQuiz()">Start Quiz</button>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-stats">
+                <span id="progress-indicator">Question 1/10</span>
+                <span id="timer-display">00:00</span>
+            </div>
+
+            <div class="question-display" id="question-text">
+                12 x 12
+            </div>
+
+            <input type="number" id="answer-input" class="answer-input" placeholder="?" autocomplete="off">
+            <div id="feedback-msg" style="text-align: center; height: 20px; color: var(--danger); font-size: 0.9rem; margin-top: 5px;"></div>
+            
+            <button class="btn" onclick="submitAnswer()">Submit</button>
+        </div>
+
+        <div id="result-screen" class="screen">
+            <h1>Session Complete!</h1>
+            
+            <div class="score-circle">
+                <span class="score-val" id="final-score">Done!</span>
+                <span class="score-label" id="final-time">00:00</span>
+            </div>
+            
+            <p style="text-align: center; color: var(--text-light); font-size: 0.9rem;">
+                Since you had to correct mistakes to proceed, here are the ones you struggled with:
+            </p>
+
+            <h2>Needs Practice</h2>
+            <ul class="review-list" id="review-list">
+                </ul>
+
+            <button class="btn" onclick="resetApp()">Practice Again</button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let mistakes = new Set(); // Track indices of questions user got wrong at least once
+        let startTime = null;
+        let timerInterval = null;
+
+        // Elements
+        const screens = {
+            settings: document.getElementById('settings-screen'),
+            quiz: document.getElementById('quiz-screen'),
+            result: document.getElementById('result-screen')
+        };
+        const elQuestionText = document.getElementById('question-text');
+        const elProgress = document.getElementById('progress-indicator');
+        const elTimer = document.getElementById('timer-display');
+        const elInput = document.getElementById('answer-input');
+        const elFeedback = document.getElementById('feedback-msg');
+
+        // Helper: Random Integer
+        const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        // Helper: Format Time
+        const formatTime = (ms) => {
+            const totalSeconds = Math.floor(ms / 1000);
+            const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        };
+
+        // Navigation
+        function showScreen(name) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            screens[name].classList.add('active');
+        }
+
+        // 1. Generate Questions
+        function generateQuestions() {
+            const qList = [];
+
+            // Settings Values
+            const doTables = document.getElementById('opt-tables').checked;
+            const maxTable = parseInt(document.getElementById('val-tables').value) || 20;
+
+            const doSquares = document.getElementById('opt-squares').checked;
+            const maxSquare = parseInt(document.getElementById('val-squares').value) || 30;
+
+            const doCubes = document.getElementById('opt-cubes').checked;
+            const maxCube = parseInt(document.getElementById('val-cubes').value) || 15;
+
+            const qty1x1 = parseInt(document.getElementById('qty-1x1').value) || 0;
+            const qty2x2 = parseInt(document.getElementById('qty-2x2').value) || 0;
+            const qtyMixed = parseInt(document.getElementById('qty-mixed').value) || 0;
+
+            if (doTables) {
+                for(let i=0; i<10; i++) {
+                    const a = rand(2, maxTable);
+                    const b = rand(2, 20);
+                    qList.push({ type: 'Table', text: `${a} × ${b}`, val: a * b });
+                }
+            }
+
+            if (doSquares) {
+                for(let i=0; i<5; i++) {
+                    const n = rand(2, maxSquare);
+                    qList.push({ type: 'Square', text: `${n}²`, val: n * n });
+                }
+            }
+
+            if (doCubes) {
+                for(let i=0; i<3; i++) {
+                    const n = rand(2, maxCube);
+                    qList.push({ type: 'Cube', text: `${n}³`, val: n * n * n });
+                }
+            }
+
+            for(let i=0; i<qty1x1; i++) {
+                const a = rand(2, 9);
+                const b = rand(2, 9);
+                qList.push({ type: 'Drill 1x1', text: `${a} × ${b}`, val: a * b });
+            }
+
+            for(let i=0; i<qty2x2; i++) {
+                const a = rand(11, 99);
+                const b = rand(11, 99);
+                qList.push({ type: 'Drill 2x2', text: `${a} × ${b}`, val: a * b });
+            }
+
+            for(let i=0; i<qtyMixed; i++) {
+                const a = rand(10, 99);
+                const b = rand(10, 99);
+                qList.push({ type: 'Mixed', text: `${a} × ${b}`, val: a * b });
+            }
+
+            return qList.sort(() => Math.random() - 0.5);
+        }
+
+        // 2. Start Quiz
+        function startQuiz() {
+            questions = generateQuestions();
+            
+            if (questions.length === 0) {
+                alert("Please select at least one option or add questions!");
+                return;
+            }
+
+            currentQuestionIndex = 0;
+            mistakes.clear(); // Clear tracking
+            showScreen('quiz');
+            loadQuestion();
+
+            // Timer
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const delta = Date.now() - startTime;
+                elTimer.textContent = formatTime(delta);
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQuestionIndex];
+            elQuestionText.textContent = q.text;
+            elProgress.textContent = `Question ${currentQuestionIndex + 1}/${questions.length}`;
+            elInput.value = '';
+            elInput.className = 'answer-input'; // remove error class
+            elFeedback.textContent = '';
+            elInput.focus();
+        }
+
+        // 3. Handle Input (UPDATED LOGIC)
+        function submitAnswer() {
+            const val = parseInt(elInput.value);
+            
+            if (isNaN(val)) return; 
+
+            const currentQ = questions[currentQuestionIndex];
+            
+            if (val === currentQ.val) {
+                // CORRECT
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    loadQuestion();
+                } else {
+                    finishQuiz();
+                }
+            } else {
+                // INCORRECT - DO NOT ADVANCE
+                // 1. Mark as a mistake for the review screen
+                mistakes.add(currentQuestionIndex);
+                
+                // 2. UI Feedback
+                elInput.classList.remove('input-error'); // reset animation
+                void elInput.offsetWidth; // trigger reflow to restart anim
+                elInput.classList.add('input-error');
+                
+                elFeedback.textContent = "Incorrect, try again!";
+                elInput.value = ''; // clear input
+                elInput.focus();
+            }
+        }
+
+        // Allow 'Enter' key
+        elInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                submitAnswer();
+            }
+        });
+
+        // 4. Finish & Results
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            const totalTime = Date.now() - startTime;
+            showScreen('result');
+
+            document.getElementById('final-time').textContent = formatTime(totalTime);
+
+            // Populate Review List based on MISTAKES set
+            const listContainer = document.getElementById('review-list');
+            listContainer.innerHTML = '';
+
+            if (mistakes.size === 0) {
+                 const li = document.createElement('li');
+                 li.style.padding = '10px';
+                 li.style.textAlign = 'center';
+                 li.style.color = 'var(--success)';
+                 li.innerHTML = "<strong>Perfect!</strong> No incorrect attempts.";
+                 listContainer.appendChild(li);
+            } else {
+                mistakes.forEach(index => {
+                    const q = questions[index];
+                    const li = document.createElement('li');
+                    li.className = 'review-item needs-practice';
+                    li.innerHTML = `
+                        <div>${q.text}</div>
+                        <div class="ans-detail">
+                            <span class="correct-ans">${q.val}</span>
+                        </div>
+                    `;
+                    listContainer.appendChild(li);
+                });
+            }
+        }
+
+        function resetApp() {
+            showScreen('settings');
+        }
+
+    </script>
 </body>
 </html>
