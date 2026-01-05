@@ -249,6 +249,10 @@
                         <input type="number" id="qty-1x1" value="0" min="0">
                     </div>
                     <div class="drill-item">
+                        <label>1 digit x 2 digit</label>
+                        <input type="number" id="qty-1x2" value="0" min="0">
+                    </div>
+                    <div class="drill-item">
                         <label>2 digit x 2 digit</label>
                         <input type="number" id="qty-2x2" value="0" min="0">
                     </div>
@@ -350,6 +354,7 @@
             const maxCube = parseInt(document.getElementById('val-cubes').value) || 15;
 
             const qty1x1 = parseInt(document.getElementById('qty-1x1').value) || 0;
+            const qty1x2 = parseInt(document.getElementById('qty-1x2').value) || 0;
             const qty2x2 = parseInt(document.getElementById('qty-2x2').value) || 0;
             const qtyMixed = parseInt(document.getElementById('qty-mixed').value) || 0;
 
@@ -379,6 +384,12 @@
                 const a = rand(2, 9);
                 const b = rand(2, 9);
                 qList.push({ type: 'Drill 1x1', text: `${a} × ${b}`, val: a * b });
+            }
+
+            for(let i=0; i<qty1x2; i++) {
+                const a = rand(2, 9);
+                const b = rand(10, 99);
+                qList.push({ type: 'Drill 1x2', text: `${a} × ${b}`, val: a * b });
             }
 
             for(let i=0; i<qty2x2; i++) {
