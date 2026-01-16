@@ -367,15 +367,13 @@
             }
 
             if (doSquares) {
-                for(let i=0; i<5; i++) {
-                    const n = rand(2, maxSquare);
+                for (let n = 2; n <= maxSquare; n++) {
                     qList.push({ type: 'Square', text: `${n}²`, val: n * n });
                 }
             }
 
             if (doCubes) {
-                for(let i=0; i<3; i++) {
-                    const n = rand(2, maxCube);
+                for (let n = 2; n <= maxCube; n++) {
                     qList.push({ type: 'Cube', text: `${n}³`, val: n * n * n });
                 }
             }
